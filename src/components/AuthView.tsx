@@ -105,11 +105,10 @@ export default function AuthView({ onSignIn, onSignUp, onSkip, error, onClearErr
                 id="password"
                 type="password"
                 required
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-[15px] text-stone-900 focus:border-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
-                placeholder="At least 6 characters"
+                placeholder="Enter any password"
               />
             </div>
 

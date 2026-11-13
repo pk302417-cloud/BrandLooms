@@ -79,7 +79,11 @@ export function useAuth() {
       options: { data: { display_name: displayName } },
     });
     if (signUpError) {
-      setError(signUpError.message);
+      setError(
+        signUpError.message.includes('known to be weak')
+          ? 'This password has appeared in a known data breach. Please choose a different password.'
+          : signUpError.message,
+      );
       return false;
     }
     if (data.session) {
