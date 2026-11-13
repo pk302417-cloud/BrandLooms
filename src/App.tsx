@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react';
 import AppHeader from '@/components/AppHeader';
 import AdminView from '@/components/AdminView';
 import ApprovalView from '@/components/ApprovalView';
-import AuthView from '@/components/AuthView';
 import PageHero, { type HeroImage } from '@/components/PageHero';
 import ReviewView from '@/components/ReviewView';
 import SourcesView from '@/components/SourcesView';
-import { useAuth } from '@/hooks/useAuth';
 import { useReviewWorkflow } from '@/hooks/useReviewWorkflow';
 import { applyPageMeta, type PageMeta } from '@/lib/pageMeta';
 import type { Role, Tab } from '@/types';
@@ -62,12 +60,10 @@ const tabFromHash = (): Tab => {
 
 export default function App() {
   const [tab, setTab] = useState<Tab>(tabFromHash);
-  const auth = useAuth();
   const [roleOverride, setRoleOverride] = useState<Role | null>(null);
-  const [skipped, setSkipped] = useState(false);
   const workflow = useReviewWorkflow();
 
-  const effectiveRole: Role = roleOverride ?? auth.user?.role ?? 'Creator';
+  const effectiveRole: Role = roleOverride ?? 'Creator';
 
   useEffect(() => {
     const onHashChange = () => setTab(tabFromHash());
@@ -80,34 +76,6 @@ export default function App() {
   useEffect(() => {
     applyPageMeta({ title: `${PAGE_TITLES[tab]} | BrandLoom`, description: content.description });
   }, [tab, content.description]);
-
-  if (auth.loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-50">
-        <p className="text-sm text-stone-500">Loading…</p>
-      </div>
-    );
-  }
-
-  if (!auth.session && !skipped) {
-    return (
-      <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
-        <AuthView
-          onSignIn={auth.signIn}
-          onSignUp={auth.signUp}
-          onSkip={() => setSkipped(true)}
-          error={auth.error}
-          onClearError={() => auth.setError(null)}
-        />
-        <footer className="border-t border-stone-200 bg-white">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p>BrandLoom is a prototype built by Team Alpha for the Inkloom AI Brand-Governance Challenge.</p>
-            <p>The demo brand, Northwind Outdoor, is fictional. No real customer data is used.</p>
-          </div>
-        </footer>
-      </div>
-    );
-  }
 
   const isAdmin = effectiveRole === 'Admin';
   const showAdminTab = tab === 'admin' && isAdmin;
@@ -122,9 +90,6 @@ export default function App() {
         tab={effectiveTab}
         role={effectiveRole}
         onRoleChange={handleRoleChange}
-        userEmail={auth.user?.email}
-        userDisplayName={auth.user?.displayName}
-        onSignOut={auth.signOut}
       />
       <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-5 sm:space-y-10 sm:px-6 sm:py-10 lg:px-8">
         {showAdminTab ? (
