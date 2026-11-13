@@ -87,14 +87,6 @@ export default function App() {
     if (tab === 'admin' && newRole !== 'Admin') window.location.hash = '#review';
   };
 
-  if (!workflow.loaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-50 text-stone-700">
-        <p className="text-sm">Loading the review workspace…</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
       <AppHeader
@@ -103,29 +95,34 @@ export default function App() {
         onRoleChange={handleRoleChange}
       />
       <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-5 sm:space-y-10 sm:px-6 sm:py-10 lg:px-8">
-        {workflow.persistenceError && (
+        {!workflow.loaded && (
+          <div className="flex items-center justify-center py-20">
+            <p className="text-sm text-stone-500">Loading the review workspace…</p>
+          </div>
+        )}
+        {workflow.loaded && workflow.persistenceError && (
           <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             {workflow.persistenceError}
           </div>
         )}
-        {showAdminTab ? (
+        {workflow.loaded && showAdminTab ? (
           <>
             <PageHero key="admin" eyebrow={content.eyebrow} title={content.title} subtitle={content.subtitle} image={content.image} />
             <AdminView workflow={workflow} />
           </>
-        ) : tab === 'admin' && !isAdmin ? (
+        ) : workflow.loaded && tab === 'admin' && !isAdmin ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
             <p className="text-base font-semibold text-amber-900">Admin access required</p>
             <p className="mt-2 text-sm text-amber-800">Your account does not have the Admin role. Ask an administrator to update your role.</p>
           </div>
-        ) : (
+        ) : workflow.loaded ? (
           <>
             <PageHero key={effectiveTab} eyebrow={effectiveContent.eyebrow} title={effectiveContent.title} subtitle={effectiveContent.subtitle} image={effectiveContent.image} />
             {effectiveTab === 'review' && <ReviewView workflow={workflow} />}
             {effectiveTab === 'approval' && <ApprovalView workflow={workflow} />}
             {effectiveTab === 'sources' && <SourcesView />}
           </>
-        )}
+        ) : null}
       </main>
       <footer className="border-t border-stone-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
