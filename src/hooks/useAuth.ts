@@ -84,6 +84,14 @@ export function useAuth() {
     }
     if (data.session) {
       setSession(data.session);
+      return true;
+    }
+    // No session returned — email confirmation may be enabled.
+    // Try to sign in immediately so the user doesn't get stuck.
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setError('Account created, but email confirmation may be required. Please check your inbox or try signing in.');
+      return false;
     }
     return true;
   };
@@ -106,3 +114,6 @@ export function useAuth() {
 
   return { session, user, loading, error, signUp, signIn, signOut, setError };
 }
+
+
+export { useAuth }
