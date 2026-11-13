@@ -1,4 +1,4 @@
-import { ShieldCheck } from 'lucide-react';
+import { LogOut, ShieldCheck } from 'lucide-react';
 import type { Role, Tab } from '@/types';
 import { BRAND_NAME } from '@/data/demoBrand';
 
@@ -8,7 +8,7 @@ const BASE_TABS: { id: Tab; label: string }[] = [
   { id: 'sources', label: 'Sources' },
 ];
 
-const ADMIN_TAB: { id: Tab; label: string } = { id: 'admin', label: 'Admin' };
+const ADMIN_TAB = { id: 'admin' as Tab, label: 'Admin' };
 
 const ROLES: Role[] = ['Creator', 'Manager', 'Reviewer', 'Admin'];
 
@@ -16,9 +16,12 @@ interface AppHeaderProps {
   tab: Tab;
   role: Role;
   onRoleChange: (role: Role) => void;
+  userEmail?: string;
+  userDisplayName?: string;
+  onSignOut: () => void;
 }
 
-export default function AppHeader({ tab, role, onRoleChange }: AppHeaderProps) {
+export default function AppHeader({ tab, role, onRoleChange, userEmail, userDisplayName, onSignOut }: AppHeaderProps) {
   const tabs = role === 'Admin' ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
   const colCount = tabs.length;
 
@@ -35,7 +38,7 @@ export default function AppHeader({ tab, role, onRoleChange }: AppHeaderProps) {
           </div>
         </div>
 
-        <nav aria-label="Main" className={`grid gap-1 rounded-lg bg-stone-100 p-1 lg:flex lg:items-center`} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+        <nav aria-label="Main" className="grid gap-1 rounded-lg bg-stone-100 p-1 lg:flex lg:items-center" style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
           {tabs.map((item) => (
             <a
               key={item.id}
@@ -51,7 +54,22 @@ export default function AppHeader({ tab, role, onRoleChange }: AppHeaderProps) {
         </nav>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm sm:justify-end">
-          <span className="text-xs text-stone-500">Acting as (demo role)</span>
+          <div className="flex items-center gap-2">
+            {userDisplayName && (
+              <div className="hidden text-right sm:block">
+                <p className="text-xs font-medium text-stone-700">{userDisplayName}</p>
+                <p className="text-xs text-stone-500">{userEmail}</p>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={onSignOut}
+              title="Sign out"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
           <div role="group" aria-label="Switch demo role" className="flex rounded-lg border border-stone-200 bg-white p-0.5">
             {ROLES.map((item) => (
               <button
