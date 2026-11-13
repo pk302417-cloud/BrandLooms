@@ -114,6 +114,3 @@ export function useAuth() {
 
   return { session, user, loading, error, signUp, signIn, signOut, setError };
 }
-
-
-export { useAuth }
