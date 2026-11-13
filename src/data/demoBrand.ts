@@ -16,6 +16,14 @@ export const SOURCES: SourceChunk[] = [
     text: 'Our voice is confident, warm and plain. Avoid exclamation marks in product copy. Do not use all-caps words for emphasis.',
   },
   {
+    id: 'G-03',
+    kind: 'Guideline',
+    title: 'Specific, confident language',
+    version: 'v1',
+    owner: 'Brand team',
+    text: 'Avoid filler intensifiers, exaggerated adjectives and hedging language. Prefer specific, confident wording that tells the reader what is true.',
+  },
+  {
     id: 'G-02',
     kind: 'Guideline',
     title: 'Claims policy',

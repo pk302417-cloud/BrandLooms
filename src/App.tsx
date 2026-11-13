@@ -82,7 +82,18 @@ export default function App() {
   const effectiveTab: Tab = tab === 'admin' && !isAdmin ? 'review' : tab;
   const effectiveContent = CONTENT[effectiveTab] ?? CONTENT.review;
 
-  const handleRoleChange = (newRole: Role) => setRoleOverride(newRole);
+  const handleRoleChange = (newRole: Role) => {
+    setRoleOverride(newRole);
+    if (tab === 'admin' && newRole !== 'Admin') window.location.hash = '#review';
+  };
+
+  if (!workflow.loaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-stone-50 text-stone-700">
+        <p className="text-sm">Loading the review workspace…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
@@ -92,6 +103,11 @@ export default function App() {
         onRoleChange={handleRoleChange}
       />
       <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-5 sm:space-y-10 sm:px-6 sm:py-10 lg:px-8">
+        {workflow.persistenceError && (
+          <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {workflow.persistenceError}
+          </div>
+        )}
         {showAdminTab ? (
           <>
             <PageHero key="admin" eyebrow={content.eyebrow} title={content.title} subtitle={content.subtitle} image={content.image} />

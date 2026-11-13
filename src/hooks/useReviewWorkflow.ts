@@ -55,13 +55,16 @@ export function useReviewWorkflow() {
   const [aiFindings, setAiFindings] = useState<Finding[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
 
   const skipPersist = useRef(false);
 
   const append = useCallback((actor: LogEntry['actor'], message: string) => {
     setLog((previous) => [{ id: crypto.randomUUID(), time: timeNow(), actor, message }, ...previous]);
     if (!skipPersist.current) {
-      supabase.from('activity_log').insert({ draft_id: DRAFT_ID, actor, message }).then(() => {});
+      supabase.from('activity_log').insert({ draft_id: DRAFT_ID, actor, message }).then(({ error }) => {
+        if (error) setPersistenceError('Changes could not be saved to the demo database.');
+      });
     }
   }, []);
 
@@ -70,11 +73,19 @@ export function useReviewWorkflow() {
     skipPersist.current = true;
     (async () => {
       try {
-        const [{ data: draftData }, { data: dismissalData }, { data: logData }] = await Promise.all([
+        const [draftResult, dismissalResult, logResult] = await Promise.all([
           supabase.from('drafts').select('*').eq('id', DRAFT_ID).maybeSingle(),
           supabase.from('dismissals').select('dismiss_key, category, reason').eq('draft_id', DRAFT_ID),
           supabase.from('activity_log').select('id, actor, message, created_at').eq('draft_id', DRAFT_ID).order('created_at', { ascending: false }),
         ]);
+
+        if (draftResult.error || dismissalResult.error || logResult.error) {
+          throw new Error('Unable to load the demo database.');
+        }
+
+        const { data: draftData } = draftResult;
+        const { data: dismissalData } = dismissalResult;
+        const { data: logData } = logResult;
 
         if (draftData) {
           const draft = draftData as DraftRow;
@@ -86,7 +97,7 @@ export function useReviewWorkflow() {
           setRoutedTo(draft.routed_to);
         } else {
           // First run: seed the draft
-          await supabase.from('drafts').insert({
+          const { error: draftInsertError } = await supabase.from('drafts').insert({
             id: DRAFT_ID,
             text: SAMPLE_CONTENT,
             channel: 'Blog post',
@@ -94,11 +105,14 @@ export function useReviewWorkflow() {
             revision: 1,
             status: 'draft',
           });
-          await supabase.from('activity_log').insert({
+          if (draftInsertError && draftInsertError.code !== '23505') throw draftInsertError;
+
+          const { error: logInsertError } = await supabase.from('activity_log').insert({
             draft_id: DRAFT_ID,
             actor: 'System',
             message: 'Draft created as revision 1.',
           });
+          if (logInsertError && logInsertError.code !== '23505') throw logInsertError;
         }
 
         if (dismissalData) {
@@ -118,7 +132,7 @@ export function useReviewWorkflow() {
           })));
         }
       } catch {
-        // If DB is unreachable, continue with in-memory state
+        setPersistenceError('The demo database is unavailable. Changes will remain only in this session.');
       } finally {
         skipPersist.current = false;
         setLoaded(true);
@@ -137,7 +151,9 @@ export function useReviewWorkflow() {
       status,
       routed_to: routedTo,
       updated_at: new Date().toISOString(),
-    }).eq('id', DRAFT_ID).then(() => {});
+    }).eq('id', DRAFT_ID).then(({ error }) => {
+      if (error) setPersistenceError('Changes could not be saved to the demo database.');
+    });
   }, [text, channel, audience, revision, status, routedTo, loaded]);
 
   const review = useMemo(() => runReview(text, SOURCES, audience), [text, audience]);
@@ -151,12 +167,17 @@ export function useReviewWorkflow() {
   useEffect(() => {
     if (!loaded) return;
     setAiLoading(true);
+    let stale = false;
     const timer = setTimeout(async () => {
       const result = await fetchAiToneFindings(text, audience);
+      if (stale) return;
       setAiFindings(result);
       setAiLoading(false);
     }, 1200);
-    return () => clearTimeout(timer);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
   }, [text, audience, loaded]);
 
   const requiredApprover: Approver = dismissals.some(
@@ -188,7 +209,9 @@ export function useReviewWorkflow() {
         dismiss_key: finding.dismissKey,
         category: finding.category,
         reason: reason.trim(),
-      }).then(() => {});
+      }).then(({ error }) => {
+        if (error) setPersistenceError('Dismissal could not be saved to the demo database.');
+      });
     }
     append('Creator', `Dismissed "${finding.matched}" (${finding.category}). Reason: ${reason.trim()}. Now revision ${revision + 1}.`);
   }, [canEdit, revision, append]);
@@ -236,6 +259,7 @@ export function useReviewWorkflow() {
     canSubmit,
     aiLoading,
     loaded,
+    persistenceError,
     setText,
     setChannel,
     setAudience,

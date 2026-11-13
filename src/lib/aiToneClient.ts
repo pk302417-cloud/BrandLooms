@@ -52,8 +52,8 @@ export async function fetchAiToneFindings(text: string, audience: Audience): Pro
         end,
         matched: item.matched,
         reason: item.reason,
-        sourceId: 'G-01',
-        quote: 'Avoid exclamation marks in product copy. Do not use all-caps words for emphasis.',
+        sourceId: 'G-03',
+        quote: 'Avoid filler intensifiers, exaggerated adjectives and hedging language. Prefer specific, confident wording that tells the reader what is true.',
         fix: item.fix,
         dismissKey: `ai-tone|${item.matched}|${text.slice(Math.max(0, (start >= 0 ? start : 0) - 24), end + 24)}`,
       };
