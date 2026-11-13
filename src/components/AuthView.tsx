@@ -5,11 +5,12 @@ import { BRAND_NAME } from '@/data/demoBrand';
 interface AuthViewProps {
   onSignIn: (email: string, password: string) => Promise<boolean>;
   onSignUp: (email: string, password: string, displayName: string) => Promise<boolean>;
+  onSkip: () => void;
   error: string | null;
   onClearError: () => void;
 }
 
-export default function AuthView({ onSignIn, onSignUp, error, onClearError }: AuthViewProps) {
+export default function AuthView({ onSignIn, onSignUp, onSkip, error, onClearError }: AuthViewProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -125,6 +126,14 @@ export default function AuthView({ onSignIn, onSignUp, error, onClearError }: Au
             </button>
           </form>
         </div>
+
+        <button
+          type="button"
+          onClick={onSkip}
+          className="mt-5 w-full rounded-lg border-2 border-stone-800 bg-white px-4 py-3 text-base font-bold text-stone-900 transition-colors hover:bg-stone-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-800 focus-visible:ring-offset-2"
+        >
+          Skip and explore as guest
+        </button>
 
         <p className="mt-4 text-center text-xs text-stone-400">
           Email confirmation is disabled. You can sign in immediately after creating an account.

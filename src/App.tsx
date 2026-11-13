@@ -64,6 +64,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(tabFromHash);
   const auth = useAuth();
   const [roleOverride, setRoleOverride] = useState<Role | null>(null);
+  const [skipped, setSkipped] = useState(false);
   const workflow = useReviewWorkflow();
 
   const effectiveRole: Role = roleOverride ?? auth.user?.role ?? 'Creator';
@@ -88,12 +89,13 @@ export default function App() {
     );
   }
 
-  if (!auth.session) {
+  if (!auth.session && !skipped) {
     return (
       <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
         <AuthView
           onSignIn={auth.signIn}
           onSignUp={auth.signUp}
+          onSkip={() => setSkipped(true)}
           error={auth.error}
           onClearError={() => auth.setError(null)}
         />
