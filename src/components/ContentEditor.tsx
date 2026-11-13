@@ -101,6 +101,11 @@ export default function ContentEditor({
         {readOnly && (
           <p className="mt-2 text-sm text-stone-500">This revision is locked while it is being reviewed.</p>
         )}
+        {audience === 'Internal team' && !readOnly && (
+          <p className="mt-2 rounded-lg bg-sky-50 p-2.5 text-xs leading-[1.5] text-sky-800">
+            Internal audience: tone checks for exclamation marks and all-caps are relaxed. Terminology, claims and fact checks still apply.
+          </p>
+        )}
       </section>
 
       <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">

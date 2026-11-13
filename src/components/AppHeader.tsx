@@ -2,11 +2,13 @@ import { ShieldCheck } from 'lucide-react';
 import type { Role, Tab } from '@/types';
 import { BRAND_NAME } from '@/data/demoBrand';
 
-const TABS: { id: Tab; label: string }[] = [
+const BASE_TABS: { id: Tab; label: string }[] = [
   { id: 'review', label: 'Review' },
   { id: 'approval', label: 'Approval' },
   { id: 'sources', label: 'Sources' },
 ];
+
+const ADMIN_TAB: { id: Tab; label: string } = { id: 'admin', label: 'Admin' };
 
 const ROLES: Role[] = ['Creator', 'Manager', 'Reviewer', 'Admin'];
 
@@ -17,6 +19,9 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ tab, role, onRoleChange }: AppHeaderProps) {
+  const tabs = role === 'Admin' ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
+  const colCount = tabs.length;
+
   return (
     <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col gap-2.5 px-4 py-2.5 sm:gap-3 sm:py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
@@ -30,8 +35,8 @@ export default function AppHeader({ tab, role, onRoleChange }: AppHeaderProps) {
           </div>
         </div>
 
-        <nav aria-label="Main" className="grid grid-cols-3 gap-1 rounded-lg bg-stone-100 p-1 lg:flex lg:items-center">
-          {TABS.map((item) => (
+        <nav aria-label="Main" className={`grid gap-1 rounded-lg bg-stone-100 p-1 lg:flex lg:items-center`} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+          {tabs.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}

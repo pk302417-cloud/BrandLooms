@@ -1,5 +1,5 @@
 export type Role = 'Creator' | 'Manager' | 'Reviewer' | 'Admin';
-export type Tab = 'review' | 'approval' | 'sources';
+export type Tab = 'review' | 'approval' | 'sources' | 'admin';
 export type Category = 'Terminology' | 'Tone' | 'Claims' | 'Facts';
 export type Severity = 'high' | 'medium' | 'low';
 export type FindingStatus = 'suggested-fix' | 'needs-human';

@@ -50,6 +50,9 @@ export default function FindingCard({ finding, source, canAct, onAccept, onDismi
         ) : (
           <Badge tone="amber">Needs a decision</Badge>
         )}
+        {finding.ruleId === 'ai-tone-check' && (
+          <Badge tone="sky">AI analysis</Badge>
+        )}
         <span className="ml-auto text-xs text-stone-500">Confidence: {finding.confidence}</span>
       </div>
 

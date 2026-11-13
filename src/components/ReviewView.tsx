@@ -6,7 +6,7 @@ import type { ReviewWorkflow } from '@/hooks/useReviewWorkflow';
 import { SOURCES } from '@/data/demoBrand';
 
 export default function ReviewView({ workflow }: { workflow: ReviewWorkflow }) {
-  const { findings, canEdit } = workflow;
+  const { findings, canEdit, aiLoading } = workflow;
   const sourceById = new Map(SOURCES.map((source) => [source.id, source]));
 
   return (
@@ -32,6 +32,12 @@ export default function ReviewView({ workflow }: { workflow: ReviewWorkflow }) {
                 Findings
               </h2>
               <p className="mt-1 text-sm text-stone-500">Each one links to the approved source it relies on.</p>
+              {aiLoading && (
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-sky-600">
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-sky-300 border-t-sky-600" />
+                  Running AI tone analysis…
+                </p>
+              )}
             </div>
             <span
               className={`shrink-0 rounded-full px-3 py-1 text-sm font-medium ${

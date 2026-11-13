@@ -1,4 +1,4 @@
-import type { Category, Confidence, Finding, FindingStatus, Severity, SourceChunk } from '@/types';
+import type { Audience, Category, Confidence, Finding, FindingStatus, Severity, SourceChunk } from '@/types';
 
 interface Verdict {
   category: Category;
@@ -15,6 +15,7 @@ interface Rule {
   id: string;
   pattern: RegExp;
   check: (match: RegExpMatchArray, sources: Map<string, SourceChunk>) => Verdict | null;
+  audiences?: Audience[];
 }
 
 export interface ReviewResult {
@@ -51,6 +52,8 @@ function factVerdict(fact: SourceChunk, claimed: string, reason: string): Verdic
   };
 }
 
+const TONE_AUDIENCES: Audience[] = ['General public', 'Existing customers', 'Industry / B2B'];
+
 const RULES: Rule[] = [
   {
     id: 'terminology-waterproof',
@@ -83,6 +86,7 @@ const RULES: Rule[] = [
   {
     id: 'tone-exclamation',
     pattern: /!/g,
+    audiences: TONE_AUDIENCES,
     check: () => ({
       category: 'Tone',
       severity: 'low',
@@ -97,12 +101,13 @@ const RULES: Rule[] = [
   {
     id: 'tone-all-caps',
     pattern: /\b[A-Z]{4,}\b/g,
+    audiences: TONE_AUDIENCES,
     check: () => ({
       category: 'Tone',
       severity: 'low',
       status: 'suggested-fix',
       confidence: 'Medium',
-      reason: 'Words in capitals are used for emphasis, which our guideline does not allow.',
+      reason: 'Words in capitals are used for emphasis, which our guideline does not allow for public-facing copy.',
       sourceId: 'G-01',
       quote: 'Do not use all-caps words for emphasis.',
       fix: (matched) => matched[0] + matched.slice(1).toLowerCase(),
@@ -175,12 +180,14 @@ function isVerified(finding: Finding, content: string, sources: Map<string, Sour
   return Boolean(source?.text.includes(finding.quote)) && content.slice(finding.start, finding.end) === finding.matched;
 }
 
-export function runReview(content: string, sources: SourceChunk[]): ReviewResult {
+export function runReview(content: string, sources: SourceChunk[], audience: Audience = 'General public'): ReviewResult {
   const byId = new Map(sources.map((source) => [source.id, source]));
   const findings: Finding[] = [];
   let discarded = 0;
 
   for (const rule of RULES) {
+    if (rule.audiences && !rule.audiences.includes(audience)) continue;
+
     for (const match of content.matchAll(rule.pattern)) {
       const verdict = rule.check(match, byId);
       if (!verdict) continue;

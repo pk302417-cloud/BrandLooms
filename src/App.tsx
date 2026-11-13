@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AppHeader from '@/components/AppHeader';
+import AdminView from '@/components/AdminView';
 import ApprovalView from '@/components/ApprovalView';
 import PageHero, { type HeroImage } from '@/components/PageHero';
 import ReviewView from '@/components/ReviewView';
@@ -13,9 +14,10 @@ interface TabContent extends PageMeta {
   title: string;
   subtitle: string;
   image: HeroImage;
+  adminOnly?: boolean;
 }
 
-const TAB_IDS: Tab[] = ['review', 'approval', 'sources'];
+const TAB_IDS: Tab[] = ['review', 'approval', 'sources', 'admin'];
 
 const CONTENT: Record<Tab, TabContent> = {
   review: {
@@ -57,12 +59,27 @@ const CONTENT: Record<Tab, TabContent> = {
       credit: 'Katya Wolf',
     },
   },
+  admin: {
+    title: 'See the health of your brand guidelines at a glance',
+    description:
+      'An admin-only dashboard showing draft status, source library health, dismissal patterns and recent activity.',
+    eyebrow: 'Admin dashboard',
+    subtitle:
+      'Track which guidelines cause the most dismissals, which facts have expired, and who has been doing what.',
+    adminOnly: true,
+    image: {
+      src: 'https://images.pexels.com/photos/35746663/pexels-photo-35746663.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      alt: 'Hiker in a red jacket walking along a foggy mountain trail',
+      credit: 'Ali Alcántara',
+    },
+  },
 };
 
 const PAGE_TITLES: Record<Tab, string> = {
   review: 'Review a draft',
   approval: 'Approval workflow',
   sources: 'Source library',
+  admin: 'Admin dashboard',
 };
 
 const tabFromHash = (): Tab => {
@@ -88,21 +105,45 @@ export default function App() {
     });
   }, [tab, content.description]);
 
+  const isAdmin = workflow.role === 'Admin';
+  const showAdminTab = tab === 'admin' && isAdmin;
+  const effectiveTab: Tab = tab === 'admin' && !isAdmin ? 'review' : tab;
+  const effectiveContent = CONTENT[effectiveTab];
+
   return (
     <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
-      <AppHeader tab={tab} role={workflow.role} onRoleChange={workflow.setRole} />
+      <AppHeader tab={effectiveTab} role={workflow.role} onRoleChange={workflow.setRole} />
       <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-5 sm:space-y-10 sm:px-6 sm:py-10 lg:px-8">
-        <PageHero
-          key={tab}
-          eyebrow={content.eyebrow}
-          title={content.title}
-          subtitle={content.subtitle}
-          image={content.image}
-        />
-
-        {tab === 'review' && <ReviewView workflow={workflow} />}
-        {tab === 'approval' && <ApprovalView workflow={workflow} />}
-        {tab === 'sources' && <SourcesView />}
+        {showAdminTab ? (
+          <>
+            <PageHero
+              key="admin"
+              eyebrow={content.eyebrow}
+              title={content.title}
+              subtitle={content.subtitle}
+              image={content.image}
+            />
+            <AdminView workflow={workflow} />
+          </>
+        ) : tab === 'admin' && !isAdmin ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+            <p className="text-base font-semibold text-amber-900">Admin access required</p>
+            <p className="mt-2 text-sm text-amber-800">Switch to the Admin role in the header to view the dashboard.</p>
+          </div>
+        ) : (
+          <>
+            <PageHero
+              key={effectiveTab}
+              eyebrow={effectiveContent.eyebrow}
+              title={effectiveContent.title}
+              subtitle={effectiveContent.subtitle}
+              image={effectiveContent.image}
+            />
+            {effectiveTab === 'review' && <ReviewView workflow={workflow} />}
+            {effectiveTab === 'approval' && <ApprovalView workflow={workflow} />}
+            {effectiveTab === 'sources' && <SourcesView />}
+          </>
+        )}
       </main>
       <footer className="border-t border-stone-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
