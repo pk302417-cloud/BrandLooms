@@ -21,15 +21,15 @@ The prototype is a single-page web app built with Vite, React 18, TypeScript and
 2. Each rule finds matches with a global pattern. A rule either returns a verdict (with category, severity, status, confidence, reason, source ID, quoted passage and optional fix) or nothing.
 3. Each candidate finding is verified before it is kept. The cited source must exist, the quoted passage must appear in that source, and the flagged text must still sit at the recorded position in the draft. A candidate that fails is discarded and counted.
 4. Findings are sorted by position. Findings the creator dismissed are removed by matching their dismissal key, which combines the rule, the flagged text and the surrounding words.
-5. Accepting a fix replaces the flagged span, increments the revision and writes to the activity log. The review then runs again on the new text.
+5. Accepting a fix or dismissing a finding creates a new revision automatically, increments the revision counter and writes to the activity log. The review then runs again on the new text.
 
 ### Workflow rules
 
-- Only the Creator can edit the draft or resolve findings, and only while the status is draft or changes requested.
+- Only the Creator can edit the draft or resolve findings, and only while the status is draft, changes requested or rejected.
 - Submission requires zero open findings and non-empty text.
 - The approver is a Reviewer if any claim or fact finding was dismissed, otherwise a Manager.
-- Only the routed approver can approve or request changes. A request for changes requires a note.
-- Approval is terminal for the revision.
+- Only the routed approver can approve, request changes or reject. A request for changes or a rejection requires a note.
+- Approval is terminal for the revision. Rejection sends the draft back to the creator for editing and resubmission.
 
 ### Rendering
 
@@ -43,14 +43,27 @@ The plan in the challenge document describes the target system. The mapping from
 
 | Concern | Prototype | Production (planned) |
 | --- | --- | --- |
-| Frontend | Vite + React | Next.js + TypeScript + Tailwind, as in the plan |
+| Frontend | Vite + React | Next.js (React) + TypeScript + Tailwind, as in the plan |
 | Backend | None | Python FastAPI, running the review pipeline and verifier |
 | Data | In-memory state for the session | PostgreSQL with pgvector on Supabase, with row-level security by role and confidentiality tier |
-| Auth | Role switch in the header | Supabase Auth with role-based access |
+| Auth | Role switch in the header | Supabase Auth with role-based access control |
+| AI analysis | None | Claude API (LLM) with structured JSON output; embedding model for retrieval |
+| Rule checks | JavaScript rules in the browser | Python rules: regex / term lists, WCAG contrast calculation (Pillow, colorspace maths), alt-text and heading checks |
+| Parsing | None | pypdf / python-docx, OCR (Tesseract) for images |
 | Retrieval | Every rule reads the whole source set | Guideline and fact chunks embedded and retrieved per content segment |
-| AI analysis | None | Claude with structured JSON output for tone, messaging and claim reasoning |
 | Verifier | Code checks citation and span | Code checks, plus a second model call that confirms the source supports the finding |
 | Audit log | In-memory activity list | Append-only audit table |
+| Hosting | Local dev server | Vercel (frontend) + Render or Railway (API) |
+| Quality | Manual testing | pytest, small labelled evaluation set of content with known issues |
+
+### Hardest technical challenge: trustworthy, grounded findings
+
+The main risk is that an AI reviewer produces plausible but wrong flags. The production architecture addresses this in four ways:
+
+- **Retrieval over approved sources only.** Guidelines and facts are chunked, embedded and retrieved per content segment. The model sees only these chunks, not its general knowledge, as the authority.
+- **Structured output with mandatory citations.** The model must return a source ID and quoted span for each finding.
+- **Verifier pass.** Code checks that the cited chunk exists, that the quoted span appears in it, and that the flagged text appears in the content. A second model call checks whether the source actually supports the finding. Failures are discarded or downgraded to "needs human review".
+- **Evaluation set.** A small labelled test set tracks precision and false-positive rate between rounds to show measurable reliability gains.
 
 ## Extending the review
 

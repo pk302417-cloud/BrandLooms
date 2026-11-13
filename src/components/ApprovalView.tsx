@@ -10,13 +10,15 @@ const STATUS_LABEL: Record<WorkflowStatus, string> = {
   'in-review': 'Waiting for review',
   'changes-requested': 'Changes requested',
   approved: 'Approved',
+  rejected: 'Rejected',
 };
 
-const STATUS_TONE: Record<WorkflowStatus, 'stone' | 'sky' | 'amber' | 'emerald'> = {
+const STATUS_TONE: Record<WorkflowStatus, 'stone' | 'sky' | 'amber' | 'emerald' | 'rose'> = {
   draft: 'stone',
   'in-review': 'sky',
   'changes-requested': 'amber',
   approved: 'emerald',
+  rejected: 'rose',
 };
 
 const STATUS_HELP: Record<WorkflowStatus, string> = {
@@ -24,6 +26,7 @@ const STATUS_HELP: Record<WorkflowStatus, string> = {
   'in-review': 'Your approver is reading this revision. It stays locked until they respond.',
   'changes-requested': 'Your approver asked for changes. Edit the draft in the Review tab, then resubmit.',
   approved: 'This revision is approved and ready to publish. The decision is in the activity log.',
+  rejected: 'This revision was rejected. Read the note below, then edit and resubmit from the Review tab.',
 };
 
 export default function ApprovalView({ workflow }: { workflow: ReviewWorkflow }) {
@@ -63,7 +66,7 @@ export default function ApprovalView({ workflow }: { workflow: ReviewWorkflow })
           )}
         </div>
 
-        {role === 'Creator' && (status === 'draft' || status === 'changes-requested') && (
+        {role === 'Creator' && (status === 'draft' || status === 'changes-requested' || status === 'rejected') && (
           <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
             <h3 className="mb-1 font-semibold text-stone-900">Send for approval</h3>
             <p className="mb-4 text-sm leading-[1.5] text-stone-600">
@@ -87,7 +90,7 @@ export default function ApprovalView({ workflow }: { workflow: ReviewWorkflow })
           <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
             <h3 className="mb-1 font-semibold text-stone-900">Decision</h3>
             <p className="mb-4 text-sm leading-[1.5] text-stone-600">
-              Add a note for the creator. A note is required to request changes.
+              Add a note for the creator. A note is required to request changes or reject.
             </p>
             <label htmlFor="decision-note" className="sr-only">
               Comment
@@ -121,6 +124,17 @@ export default function ApprovalView({ workflow }: { workflow: ReviewWorkflow })
                 className="rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
               >
                 Request changes
+              </button>
+              <button
+                type="button"
+                disabled={!canDecide}
+                onClick={() => {
+                  workflow.decide('reject', comment);
+                  setComment('');
+                }}
+                className="rounded-lg border border-rose-300 bg-white px-4 py-2.5 text-sm font-medium text-rose-800 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
+              >
+                Reject
               </button>
             </div>
           </div>

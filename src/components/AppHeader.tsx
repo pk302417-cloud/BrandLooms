@@ -8,7 +8,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'sources', label: 'Sources' },
 ];
 
-const ROLES: Role[] = ['Creator', 'Manager', 'Reviewer'];
+const ROLES: Role[] = ['Creator', 'Manager', 'Reviewer', 'Admin'];
 
 interface AppHeaderProps {
   tab: Tab;

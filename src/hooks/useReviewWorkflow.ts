@@ -3,6 +3,7 @@ import { SAMPLE_CONTENT, SOURCES } from '@/data/demoBrand';
 import { runReview } from '@/lib/reviewEngine';
 import type {
   Approver,
+  Audience,
   Channel,
   Dismissal,
   Finding,
@@ -16,6 +17,7 @@ const timeNow = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', 
 export function useReviewWorkflow() {
   const [text, setText] = useState(SAMPLE_CONTENT);
   const [channel, setChannel] = useState<Channel>('Blog post');
+  const [audience, setAudience] = useState<Audience>('General public');
   const [revision, setRevision] = useState(1);
   const [role, setRole] = useState<Role>('Creator');
   const [status, setStatus] = useState<WorkflowStatus>('draft');
@@ -38,7 +40,7 @@ export function useReviewWorkflow() {
     ? 'Reviewer'
     : 'Manager';
 
-  const canEdit = role === 'Creator' && (status === 'draft' || status === 'changes-requested');
+  const canEdit = role === 'Creator' && (status === 'draft' || status === 'changes-requested' || status === 'rejected');
   const canSubmit = canEdit && findings.length === 0 && text.trim().length > 0;
 
   const acceptFix = (finding: Finding, replacement: string) => {
@@ -54,23 +56,30 @@ export function useReviewWorkflow() {
       ...previous,
       { key: finding.dismissKey, category: finding.category, reason: reason.trim() },
     ]);
-    append('Creator', `Dismissed "${finding.matched}" (${finding.category}). Reason: ${reason.trim()}`);
+    setRevision(revision + 1);
+    append('Creator', `Dismissed "${finding.matched}" (${finding.category}). Reason: ${reason.trim()}. Now revision ${revision + 1}.`);
   };
 
   const submitForApproval = () => {
     if (!canSubmit) return;
-    const submittedRevision = status === 'changes-requested' ? revision + 1 : revision;
+    const submittedRevision = status === 'changes-requested' || status === 'rejected' ? revision + 1 : revision;
     setRevision(submittedRevision);
     setStatus('in-review');
     setRoutedTo(requiredApprover);
     append('Creator', `Submitted revision ${submittedRevision} for approval. Routed to ${requiredApprover}.`);
   };
 
-  const decide = (decision: 'approve' | 'request-changes', comment: string) => {
+  const decide = (decision: 'approve' | 'request-changes' | 'reject', comment: string) => {
     if (status !== 'in-review' || routedTo === null || role !== routedTo) return;
     if (decision === 'approve') {
       setStatus('approved');
       append(role, `Approved revision ${revision}.${comment.trim() ? ` Note: ${comment.trim()}` : ''}`);
+      return;
+    }
+    if (decision === 'reject') {
+      if (comment.trim() === '') return;
+      setStatus('rejected');
+      append(role, `Rejected revision ${revision}: ${comment.trim()}`);
       return;
     }
     if (comment.trim() === '') return;
@@ -81,6 +90,7 @@ export function useReviewWorkflow() {
   return {
     text,
     channel,
+    audience,
     revision,
     role,
     status,
@@ -93,6 +103,7 @@ export function useReviewWorkflow() {
     canSubmit,
     setText,
     setChannel,
+    setAudience,
     setRole,
     acceptFix,
     dismissFinding,

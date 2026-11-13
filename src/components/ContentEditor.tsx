@@ -1,5 +1,5 @@
-import type { Channel, Finding, Severity } from '@/types';
-import { CHANNELS } from '@/data/demoBrand';
+import type { Audience, Channel, Finding, Severity } from '@/types';
+import { AUDIENCES, CHANNELS } from '@/data/demoBrand';
 
 const MARK_TONES: Record<Severity, string> = {
   high: 'bg-rose-100 text-rose-900',
@@ -10,10 +10,12 @@ const MARK_TONES: Record<Severity, string> = {
 interface ContentEditorProps {
   text: string;
   channel: Channel;
+  audience: Audience;
   readOnly: boolean;
   findings: Finding[];
   onTextChange: (text: string) => void;
   onChannelChange: (channel: Channel) => void;
+  onAudienceChange: (audience: Audience) => void;
 }
 
 function HighlightedPreview({ text, findings }: { text: string; findings: Finding[] }) {
@@ -36,10 +38,12 @@ function HighlightedPreview({ text, findings }: { text: string; findings: Findin
 export default function ContentEditor({
   text,
   channel,
+  audience,
   readOnly,
   findings,
   onTextChange,
   onChannelChange,
+  onAudienceChange,
 }: ContentEditorProps) {
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -49,21 +53,38 @@ export default function ContentEditor({
             <h2 className="text-base font-semibold leading-[1.2] text-stone-900">Your draft</h2>
             <p className="text-sm text-stone-500">{text.length} characters</p>
           </div>
-          <label className="flex items-center gap-2 text-sm text-stone-600">
-            Channel
-            <select
-              value={channel}
-              disabled={readOnly}
-              onChange={(event) => onChannelChange(event.target.value as Channel)}
-              className="rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm text-stone-900 focus:border-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:bg-stone-100 disabled:text-stone-500"
-            >
-              {CHANNELS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex items-center gap-2 text-sm text-stone-600">
+              Channel
+              <select
+                value={channel}
+                disabled={readOnly}
+                onChange={(event) => onChannelChange(event.target.value as Channel)}
+                className="rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm text-stone-900 focus:border-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:bg-stone-100 disabled:text-stone-500"
+              >
+                {CHANNELS.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm text-stone-600">
+              Audience
+              <select
+                value={audience}
+                disabled={readOnly}
+                onChange={(event) => onAudienceChange(event.target.value as Audience)}
+                className="rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm text-stone-900 focus:border-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:bg-stone-100 disabled:text-stone-500"
+              >
+                {AUDIENCES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
         <label htmlFor="draft-text" className="sr-only">
           Draft copy

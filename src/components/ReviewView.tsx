@@ -15,10 +15,12 @@ export default function ReviewView({ workflow }: { workflow: ReviewWorkflow }) {
         <ContentEditor
           text={workflow.text}
           channel={workflow.channel}
+          audience={workflow.audience}
           readOnly={!canEdit}
           findings={findings}
           onTextChange={workflow.setText}
           onChannelChange={workflow.setChannel}
+          onAudienceChange={workflow.setAudience}
         />
       </Reveal>
 

@@ -24,7 +24,7 @@ When AI analysis is added, the product will show users, in plain language:
 - Dismissing a finding requires a written reason.
 - Claims and expired facts never receive an automatic rewrite.
 - Approval routing depends on risk. A dismissed claim or fact requires a Reviewer.
-- Approvers must leave a note when requesting changes.
+- Approvers must leave a note when requesting changes or rejecting.
 
 ## Grounded findings
 
@@ -34,7 +34,11 @@ When AI analysis is added, the product will show users, in plain language:
 
 ## Confidentiality (planned)
 
-Each source and draft will carry a tier. Restricted material will never leave the organisation's own environment. Internal material will be redacted before any external call, with emails, phone numbers and keys removed. The prototype has no tiers yet because it sends nothing externally.
+Each source and content item will carry a confidentiality tier. Restricted items will never be sent to external services. Internal items will be sent only after redaction of detected sensitive data (emails, phone numbers, keys). The prototype has no tiers yet because it sends nothing externally.
+
+## Access control (planned)
+
+Role-based permissions and row-level security will ensure users see only the workspaces and content they are allowed to access. The prototype uses a demo role switch, not verified identities.
 
 ## Fairness
 
@@ -53,3 +57,4 @@ Each source and draft will carry a tier. Restricted material will never leave th
 - Controls have visible focus states and labels.
 - Motion is reduced for users who prefer less motion.
 - Text uses dark-on-light colour pairs. A formal WCAG contrast audit has not been run yet.
+- The interface follows keyboard navigation, contrast and label patterns. Tone checks avoid penalising dialects or non-native writers by tying flags to written guidelines rather than taste.

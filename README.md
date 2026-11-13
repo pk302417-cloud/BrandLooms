@@ -2,15 +2,24 @@
 
 BrandLoom is an explainable brand-governance platform. It checks marketing and content drafts against an organisation's approved brand guidelines, terminology and facts before they are published. Every finding points to the passage it relies on, suggested fixes are optional, and people make every publishing decision.
 
-This repository contains the working prototype for **Team Alpha** (Gaurav Kumar, team lead; Shimpy Kumari) for the Inkloom AI Brand-Governance Challenge.
+This repository contains the working prototype for **Team Alpha** for the Inkloom AI Brand-Governance Challenge.
+
+## Team
+
+| Member | Role | Responsibilities |
+| --- | --- | --- |
+| Gaurav Kumar | Team lead, backend and AI | Review pipeline, retrieval, citation verifier, prompt design and evaluation set; database schema, authentication and role-based access; source library import; deployment and audit log |
+| Shimpy Kumari | Frontend, rules and documentation | Submission and findings UI, diff view, approval workflow screens and accessibility; deterministic checks (terminology, contrast, alt text); insights dashboard; demo data, testing and documentation |
+
+Both members review each other's work, join all planning decisions and prepare the demonstration together, so either can explain any part of the product.
 
 ## What the prototype does
 
-- **Review a draft.** Write or paste copy, choose a channel, and see highlighted text with findings.
+- **Review a draft.** Write or paste copy, choose a channel and audience, and see highlighted text with findings.
 - **Cited findings.** Each finding names its category, severity, confidence, the reason it was raised, and the approved source passage behind it.
-- **Suggested fixes.** Fixes appear as a before-and-after change. Accept, edit, or dismiss each one. Dismissals need a written reason.
+- **Suggested fixes.** Fixes appear as a before-and-after change. Accept, edit, or dismiss each one. Dismissals need a written reason. Both accepting a fix and dismissing a finding create a new revision automatically.
 - **Approval routing.** Drafts can only be sent for approval once every finding is resolved. A dismissed claim or fact routes the draft to a Reviewer; otherwise a Manager approves it.
-- **Decisions and comments.** Approvers approve or request changes, with a note. An activity log records every edit, decision and comment.
+- **Decisions and comments.** Approvers approve, request changes, or reject, with a note. An activity log records every edit, decision and comment.
 - **Source library.** Browse the guidelines and approved facts, with versions, owners and expiry dates.
 
 The demo uses a fictional brand, **Northwind Outdoor**, with synthetic guidelines and facts. No real or confidential material is included.

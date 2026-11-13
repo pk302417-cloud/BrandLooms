@@ -1,12 +1,13 @@
-export type Role = 'Creator' | 'Manager' | 'Reviewer';
+export type Role = 'Creator' | 'Manager' | 'Reviewer' | 'Admin';
 export type Tab = 'review' | 'approval' | 'sources';
 export type Category = 'Terminology' | 'Tone' | 'Claims' | 'Facts';
 export type Severity = 'high' | 'medium' | 'low';
 export type FindingStatus = 'suggested-fix' | 'needs-human';
 export type Confidence = 'High' | 'Medium';
-export type WorkflowStatus = 'draft' | 'in-review' | 'changes-requested' | 'approved';
+export type WorkflowStatus = 'draft' | 'in-review' | 'changes-requested' | 'approved' | 'rejected';
 export type Approver = 'Manager' | 'Reviewer';
 export type Channel = 'Blog post' | 'Product page' | 'Social post' | 'Email';
+export type Audience = 'General public' | 'Existing customers' | 'Industry / B2B' | 'Internal team';
 
 export interface SourceChunk {
   id: string;

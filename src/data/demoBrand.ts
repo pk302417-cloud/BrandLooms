@@ -1,8 +1,10 @@
-import type { Channel, SourceChunk } from '@/types';
+import type { Audience, Channel, SourceChunk } from '@/types';
 
 export const BRAND_NAME = 'Northwind Outdoor';
 
 export const CHANNELS: Channel[] = ['Blog post', 'Product page', 'Social post', 'Email'];
+
+export const AUDIENCES: Audience[] = ['General public', 'Existing customers', 'Industry / B2B', 'Internal team'];
 
 export const SOURCES: SourceChunk[] = [
   {
